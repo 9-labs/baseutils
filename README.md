@@ -6,3 +6,5 @@
 Utilities implemented so far:
 
 * [cat](cat)
+* [pwd](pwd)
+
