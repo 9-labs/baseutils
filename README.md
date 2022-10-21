@@ -1,7 +1,5 @@
 # baseutils
-**Implementations of basic Unix utilities, for learning purposes.**
-
----
+###### Implementations of basic Unix utilities, for learning purposes.
 
 ## Utilities
 
