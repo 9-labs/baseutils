@@ -1,0 +1,2 @@
+cat:
+	cd cat && $(MAKE)
