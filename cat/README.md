@@ -1,7 +1,5 @@
 # cat
-**Concatenates and prints files.**
-
----
+###### Concatenates and prints files.
 
 ## Usage
 
