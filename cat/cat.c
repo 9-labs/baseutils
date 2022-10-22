@@ -50,8 +50,6 @@ main(int argc, char *argv[])
 
 	e = 0;
 
-	setlocale(LC_ALL, "");
-
 	while ((ch = getopt(argc, argv, "u")) != -1) {
 		switch (ch) {
 		case 'u':
