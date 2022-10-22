@@ -17,8 +17,6 @@ main(int argc, char *argv[])
 
 	L = true;
 
-	setlocale(LC_ALL, "");
-
 	while ((ch = getopt(argc, argv, ":LP")) != -1) {
 		switch (ch) {
 		case 'L':
