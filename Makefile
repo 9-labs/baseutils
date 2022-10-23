@@ -1,4 +1,4 @@
-BINARIES = bin/cat bin/pwd bin/head
+BINARIES = bin/cat bin/pwd bin/head bin/mkdir
 
 all: $(BINARIES)
 
@@ -13,6 +13,10 @@ bin/pwd: pwd/pwd.c
 head: bin/head
 bin/head: head/head.c
 	cd head; $(MAKE)
+
+mkdir: bin/mkdir
+bin/mkdir: mkdir/mkdir.c
+	cd mkdir; $(MAKE)
 
 clean:
 	rm -f $(BINARIES)
