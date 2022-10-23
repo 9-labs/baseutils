@@ -73,7 +73,7 @@ pswitch(char *path)
 
 		// POSIX demands it done like this for some reason...
 		e = mkdir(copy, 0);
-		if (e)
+		if (e != -1)
 			chmod(copy, (S_IWUSR|S_IXUSR|(~umask(umask(0))))&0777);
 
 		if (e == -1 && errno != EEXIST) {
