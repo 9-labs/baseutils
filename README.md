@@ -8,4 +8,4 @@ Utilities implemented so far:
 * [cat](cat)
 * [pwd](pwd)
 * [head](head)
-
+* [mkdir](mkdir)
