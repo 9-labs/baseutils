@@ -13,4 +13,6 @@ Strives to meet the POSIX standard for `mkdir`.
 
 ## Issues
 
-Missing implementation of `-m mode` switch. 
+`-m` mode switch relies on setmode()/getmode() not present in POSIX
+specification of `<unistd.h>`, perhaps implement one in this package at some
+point.

@@ -96,6 +96,8 @@ main(int argc, char *argv[])
 	char *m;
 	int i;
 	char *copy;
+	mode_t mode;
+	void *set;
 
 	p = false;
 	m = NULL;
@@ -133,7 +135,19 @@ main(int argc, char *argv[])
 		if (p)
 			pswitch(argv[i]);
 
-		if (mkdir(argv[i], S_IRWXU | S_IRWXG | S_IRWXO) == -1) {
+		mode = S_IRWXU | S_IRWXG | S_IRWXO;
+		
+		if (m != NULL) {
+			mode = getmode(m, mode);
+
+			if ((set = setmode(m)) == NULL)
+				fprintf(stderr, "mkdir: invalid file mode: %s",
+						m);
+
+			mode = getmode(set, mode);
+		}
+
+		if (mkdir(argv[i], mode) == -1) {
 			fprintf(stderr, "mkdir: %s: %s\n",
 					argv[i], strerror(errno));
 			status = EXIT_FAILURE;
