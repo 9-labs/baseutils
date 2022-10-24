@@ -120,7 +120,7 @@ main(int argc, char *argv[])
 	for (i = 0; i < argc; i++) {
 		if (R) {	// -R 
 			recurse(argv[i]);
-			return EXIT_SUCCESS;
+			return status;
 		}
 
 		if (chmod(argv[i], mode) != 0) {
