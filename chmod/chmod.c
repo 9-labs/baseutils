@@ -40,11 +40,33 @@
 static const char *usage = "chmod [-R] mode file...";
 static int status;
 
+static mode_t mode;
+
+static void recurse(const char *path);
+
+static int
+ftwcallback(const char *name, const struct stat *object, int flag)
+{
+	if (chmod(name, mode) != 0) {
+		fprintf(stderr, "chmod: %s\n", strerror(errno));
+		status = EXIT_FAILURE;
+	}
+
+	return 0;
+}
+
 // -R flag. If named file is a directory, set the mode of all contained files
 static void
-recursive(char *path, mode_t mode)
+recurse(const char *path)
 {
-	return;
+	int r;
+	
+	r = ftw(path, ftwcallback, 1);
+
+	if (r != 0) {
+		fprintf(stderr, "chmod: %s\n", strerror(errno));
+		status = EXIT_FAILURE;
+	}
 }
 
 int
@@ -53,7 +75,6 @@ main(int argc, char *argv[])
 	char ch;
 	bool R;
 	char *m;
-	mode_t mode;
 	void *set;
 	int i;
 	
@@ -97,11 +118,13 @@ main(int argc, char *argv[])
 	argv++;
 
 	for (i = 0; i < argc; i++) {
-		if (R)	// -R 
-			recursive(argv[i], mode);
+		if (R) {	// -R 
+			recurse(argv[i]);
+			return EXIT_SUCCESS;
+		}
 
 		if (chmod(argv[i], mode) != 0) {
-			fprintf(stderr, "chmod: %d: %s\n", errno, strerror(errno));
+			fprintf(stderr, "chmod: %s\n", strerror(errno));
 			status = EXIT_FAILURE;
 		}
 	}
