@@ -35,7 +35,10 @@
 #include <string.h>
 #include <unistd.h>
 
-static int
+static const char *usage = "head [-n number] [file...]";
+static int status;
+
+static void
 head(char *filename, long line, bool header, int count)
 {
 	FILE *f;
@@ -49,7 +52,8 @@ head(char *filename, long line, bool header, int count)
 
 	if (f == NULL) {
 		fprintf(stderr, "head: %s: %s\n", filename, strerror(errno));
-		return 1;
+		status = EXIT_FAILURE;
+		return;
 	}
 
 	if (header && count > 0)
@@ -70,8 +74,6 @@ head(char *filename, long line, bool header, int count)
 
 	if (filename != NULL)
 		fclose(f);
-
-	return 0;
 }
 
 int
@@ -82,11 +84,10 @@ main(int argc, char *argv[])
 	long l;
 	int i;
 	bool header;
-	int status;
 
 	n = NULL;
 	header = false;
-	status = 0;
+	status = EXIT_SUCCESS;
 
 	while ((ch = getopt(argc, argv, "n:")) != -1) {
 		switch (ch) {
@@ -123,10 +124,10 @@ main(int argc, char *argv[])
 	}
 
 	if (argc == 0)
-		status += head(NULL, l, false, 0);
+		head(NULL, l, false, 0);
 
 	for (i = 0; i < argc; i++) {
-		status += head(argv[i], l, header, i);
+		head(argv[i], l, header, i);
 	}
 	
 	return status;
