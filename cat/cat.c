@@ -36,6 +36,7 @@
 #include <unistd.h>
 
 static const char *usage = "cat [-u] [file...]";
+static int status;
 
 static FILE *
 openfile(char *filename)
@@ -69,9 +70,8 @@ main(int argc, char *argv[])
 	char ch;
 	int i;
 	FILE *f;
-	int e;
 
-	e = EXIT_SUCCESS;
+	status = EXIT_SUCCESS;
 
 	while ((ch = getopt(argc, argv, "u")) != -1) {
 		switch (ch) {
@@ -102,8 +102,8 @@ main(int argc, char *argv[])
 		if (f != NULL)
 			output(f);
 		else
-			e = EXIT_FAILURE;
+			status = EXIT_FAILURE;
 	}
 
-	return e;
+	return status;
 }
