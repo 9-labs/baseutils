@@ -97,7 +97,7 @@ main(int argc, char *argv[])
 		case '?':
 		default:
 			fprintf(stderr,
-				"Usage:\n\thead [-n number] [file...]\n");
+				"Usage:\n\t%s\n", usage);
 			return 1;
 		}
 	}
