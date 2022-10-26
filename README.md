@@ -9,4 +9,5 @@ Utilities implemented so far:
 * [pwd](pwd)
 * [head](head)
 * [mkdir](mkdir)
+* [rmdir](rmdir)
 * [chmod](chmod)
