@@ -55,7 +55,11 @@ ftwcallback(const char *name, const struct stat *object, int flag)
 	return 0;
 }
 
-// -R flag. If named file is a directory, set the mode of all contained files
+/*
+ * -R flag
+ *  If named file is a directory, set the mode of all contained file and the
+ *  directory itself.
+ */
 static void
 recurse(const char *path)
 {
@@ -69,10 +73,15 @@ recurse(const char *path)
 	}
 }
 
+/*
+ * chmod - Change file modes (permissions)
+ * Change file `mode` of `file...`
+ * 	-R If named file is directory, set mode of the directory and all the
+ * 		files it contains.
+ */
 int
 main(int argc, char *argv[])
 {
-	char ch;
 	bool R;
 	char *m;
 	void *set;
@@ -81,21 +90,17 @@ main(int argc, char *argv[])
 	status = EXIT_SUCCESS;
 	R = false;
 
-	while ((ch = getopt(argc, argv, "R")) != -1) {
-		switch (ch) {
-		case 'R':
-			R = true;
-			break;
-		case '?':
-		default:
-			fprintf(stderr,
-				"Usage:\n\t%s\n", usage);
-			return 1;
-		}
+	/*
+	 * We only support one flag (-R), there is no reason to use getopt
+	 * for argument parsing here, just interferes with mode parsing.
+	 */
+
+	if (strcmp(argv[1], "-R") == 0) {
+		R = true;
 	}
 
-	argc -= optind;
-	argv += optind;
+	argc -= 2;
+	argv += 2;
 
 	if (argc < 2) {
 		fprintf(stderr, "chmod: requires a mode and file argument.\n");
