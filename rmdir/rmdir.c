@@ -38,6 +38,41 @@
 static const char *usage = "rmdir [-p] dir...";
 static int status;
 
+/*
+ * Remove all directories in the given path from right to left
+ * rmdir() the current `path`, place an early null terminator to trim the last
+ * path component and keep calling this function recursively until all 
+ * mentioned directories are removed.
+ */
+static void
+pflag(char *path)
+{
+	int i;
+
+	if (rmdir(path) == -1) {
+		fprintf(stderr, "rmdir: %s: %s\n", path, strerror(errno));
+		
+		status = EXIT_FAILURE;
+		return;
+	}
+
+	i = strlen(path);
+
+	for (; i > 0; i--) {
+		if (path[i] == '/') {
+			path[i] = '\0';
+			pflag(path);
+
+			break;
+		}
+	}
+}
+
+/*
+ * rmdir - Remove directories
+ * Remove directories specified by `dir` operand in order given.
+ * 	-p removes all directories in a path name for each directory operand.
+ */
 int
 main(int argc, char *argv[])
 {
@@ -72,6 +107,12 @@ main(int argc, char *argv[])
 	}	
 
 	for (i = 0; i < argc; i++) {
+		if (p) {
+			// -p: Remove all directories in the path name (L<-R)
+			pflag(argv[i]);
+			return status;
+		}
+
 		if (rmdir(argv[i]) == -1) {
 			fprintf(stderr, "rmdir: %s: %s\n", argv[i],
 					strerror(errno));
