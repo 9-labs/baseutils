@@ -105,8 +105,6 @@ main(int argc, char *argv[])
 
 	m = argv[0];
 
-	mode = getmode(m, mode);
-
 	if ((set = setmode(m)) == NULL) {
 		fprintf(stderr, "chmod: invalid file mode: %s\n", m);
 		return EXIT_FAILURE;
