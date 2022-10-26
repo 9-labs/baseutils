@@ -138,8 +138,6 @@ main(int argc, char *argv[])
 		mode = S_IRWXU | S_IRWXG | S_IRWXO;
 		
 		if (m != NULL) {
-			mode = getmode(m, mode);
-
 			if ((set = setmode(m)) == NULL)
 				fprintf(stderr, "mkdir: invalid file mode: %s",
 						m);
