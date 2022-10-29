@@ -108,43 +108,40 @@ modeset(const void *set, mode_t mode)
 {
 	struct action *action;
 	mode_t mid;
+	bool u, g, o;
 
 	action = (struct action *) set;
 
 	if (action->permcopy != '\0') {
+
 		action->perms = mode;
 
 		if (action->permcopy != 'u') {
 			mid = 0;
-			mid |= S_IRUSR;
-			mid |= S_IWUSR;
-			mid |= S_IXUSR;
+			mid |= S_IRWXU;
 			mid = ~mid;
-			action->perms = action->perms & mode;
+			action->perms &= mid;
 		}
 
 		if (action->permcopy != 'g') {
 			mid = 0;
-			mid |= S_IRGRP;
-			mid |= S_IWGRP;
-			mid |= S_IXGRP;
+			mid |= S_IRWXG;
 			mid = ~mid;
-			action->perms = action->perms & mode;
+			action->perms &= mid;
 		}
 
 		if (action->permcopy != 'o') {
 			mid = 0;
-			mid |= S_IROTH;
-			mid |= S_IWOTH;
-			mid |= S_IXOTH;
+			mid |= S_IRWXO;
 			mid = ~mid;
-			action->perms = action->perms & mode;
+			action->perms &= mid;
 		}
 
 	}
 
 	switch (action->op) {
 	case '+':
+		printf("Fuck: %o\n", action->perms);
 		mode |= action->perms;
 		break;
 	case '-':
@@ -180,7 +177,8 @@ modecomp(const char *str)
 
 	r = w = x = X = s = t = false;
 
-	while (*ptr != '\0') {
+	while (*ptr != '\0' || state == APPLY) {
+
 		if (*ptr == ',') {
 			ptr++;
 			state = CLAUSE;
@@ -193,8 +191,10 @@ modecomp(const char *str)
 		case 'r': case 'w': case 'x': case 'X': case 's': case 't':
 			break;
 		default:
-			errno = EINVAL;
-			return NULL;
+			if (state != APPLY) {
+				errno = EINVAL;
+				return NULL;
+			}
 		}
 
 		switch (state) {
@@ -267,17 +267,17 @@ modecomp(const char *str)
 				case 'u':
 					curr->permcopy = 'u';
 					ptr++;
-					state = ACTION;
+					state = APPLY;
 					continue;
 				case 'g':
 					curr->permcopy = 'g';
 					ptr++;
-					state = ACTION;
+					state = APPLY;
 					continue;
 				case 'o':
 					curr->permcopy = 'o';
 					ptr++;
-					state = ACTION;
+					state = APPLY;
 					continue;
 				default:
 					state = PERM;
@@ -306,7 +306,7 @@ modecomp(const char *str)
 						state = CLAUSE;
 						continue;
 					}
-					state = ACTION;
+					state = CLAUSE;
 					break;
 				}
 			case APPLY:
@@ -336,6 +336,11 @@ modecomp(const char *str)
 
 					curr->next = calloc(1,
 							sizeof(struct action));
+
+					if (curr->permcopy != '\0')
+						curr->next->permcopy =
+							curr->permcopy;
+
 					curr = curr->next;
 					curr->op = '+';
 				}
@@ -372,9 +377,12 @@ modecomp(const char *str)
 					x = false;
 				}
 
-				break;
+				state = PERM;
+
+				continue;
 		}
 	}
+
 	return root;
 }
 
