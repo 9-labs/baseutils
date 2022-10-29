@@ -87,9 +87,11 @@ main(int argc, char *argv[])
 	char *m;
 	void *set;
 	int i;
+	struct stat *s;
 	
 	status = EXIT_SUCCESS;
 	R = false;
+	s = malloc(sizeof(struct stat));
 
 	/*
 	 * We only support one flag (-R), there is no reason to use getopt
@@ -118,13 +120,16 @@ main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	mode = modeset(set, mode);
-
 	argc--;
 	argv++;
 
 	for (i = 0; i < argc; i++) {
-		if (R) {	// -R 
+		stat(argv[i], s);
+		mode = s->st_mode;
+
+		mode = modeset(set, mode);
+
+		if (R) { // -R 
 			recurse(argv[i]);
 			return status;
 		}
@@ -134,6 +139,8 @@ main(int argc, char *argv[])
 			status = EXIT_FAILURE;
 		}
 	}
+
+	free(s);
 
 	return status;
 }
