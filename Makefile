@@ -1,6 +1,11 @@
 BINARIES = bin/cat bin/pwd bin/head bin/mkdir bin/chmod bin/rmdir
 
-all: $(BINARIES)
+OBJECTS = bin/mode.o
+
+all: $(BINARIES) $(OBJECTS)
+
+bin/mode.o: common/mode.c
+	cc -c -o bin/mode.o common/mode.c
 
 cat: bin/cat
 bin/cat: cat/cat.c
@@ -27,4 +32,4 @@ bin/rmdir: rmdir/rmdir.c
 	cd rmdir; $(MAKE)
 
 clean:
-	rm -f $(BINARIES)
+	rm -f $(BINARIES) $(OBJECTS)
