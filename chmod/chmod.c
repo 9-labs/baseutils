@@ -36,6 +36,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <ftw.h>
+#include "mode.h"
 
 static const char *usage = "chmod [-R] mode file...";
 static int status;
@@ -97,10 +98,12 @@ main(int argc, char *argv[])
 
 	if (strcmp(argv[1], "-R") == 0) {
 		R = true;
+		argc -= 1;
+		argv += 1;
 	}
 
-	argc -= 2;
-	argv += 2;
+	argc -= 1;
+	argv += 1;
 
 	if (argc < 2) {
 		fprintf(stderr, "chmod: requires a mode and file argument.\n");
@@ -110,12 +113,12 @@ main(int argc, char *argv[])
 
 	m = argv[0];
 
-	if ((set = setmode(m)) == NULL) {
+	if ((set = modecomp(m)) == NULL) {
 		fprintf(stderr, "chmod: invalid file mode: %s\n", m);
 		return EXIT_FAILURE;
 	}
 
-	mode = getmode(set, mode);
+	mode = modeset(set, mode);
 
 	argc--;
 	argv++;
