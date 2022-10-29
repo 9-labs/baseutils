@@ -89,6 +89,11 @@
 struct action {
 	char op;
 	char permcopy;
+	struct {
+		bool u : 1;
+		bool g : 1;
+		bool o : 1;
+	} permset;
 	mode_t perms;
 	struct action *next;
 };
@@ -112,36 +117,9 @@ modeset(const void *set, mode_t mode)
 
 	action = (struct action *) set;
 
-	if (action->permcopy != '\0') {
-
-		action->perms = mode;
-
-		if (action->permcopy != 'u') {
-			mid = 0;
-			mid |= S_IRWXU;
-			mid = ~mid;
-			action->perms &= mid;
-		}
-
-		if (action->permcopy != 'g') {
-			mid = 0;
-			mid |= S_IRWXG;
-			mid = ~mid;
-			action->perms &= mid;
-		}
-
-		if (action->permcopy != 'o') {
-			mid = 0;
-			mid |= S_IRWXO;
-			mid = ~mid;
-			action->perms &= mid;
-		}
-
-	}
 
 	switch (action->op) {
 	case '+':
-		printf("Fuck: %o\n", action->perms);
 		mode |= action->perms;
 		break;
 	case '-':
@@ -159,7 +137,7 @@ modeset(const void *set, mode_t mode)
 	return mode;
 }
 
-void * /* compiling state to mode_t */
+void *
 modecomp(const char *str)
 {
 	enum state state;
@@ -318,28 +296,23 @@ modecomp(const char *str)
 				 */
 				if (curr->op == '=') {
 					curr->op = '-';
-					if (u) {
-						curr->perms |= S_IRUSR;
-						curr->perms |= S_IWUSR;
-						curr->perms |= S_IXUSR;
-					}
-					if (g) {
-						curr->perms |= S_IRGRP;
-						curr->perms |= S_IWGRP;
-						curr->perms |= S_IXGRP;
-					}
-					if (o) {
-						curr->perms |= S_IROTH;
-						curr->perms |= S_IWOTH;
-						curr->perms |= S_IXOTH;
-					}
+					if (u)
+						curr->perms |= S_IRWXU;
+					if (g)
+						curr->perms |= S_IRWXG;
+					if (o)
+						curr->perms |= S_IRWXO;
 
 					curr->next = calloc(1,
 							sizeof(struct action));
 
-					if (curr->permcopy != '\0')
+					if (curr->permcopy != '\0') {
 						curr->next->permcopy =
 							curr->permcopy;
+						curr->permset.u = u;
+						curr->permset.g = g;
+						curr->permset.o = o;
+					}
 
 					curr = curr->next;
 					curr->op = '+';
