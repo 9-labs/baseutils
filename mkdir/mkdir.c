@@ -35,6 +35,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include "mode.h"
 
 static const char *usage = "mkdir [-p] [-m mode] dir...";
 static int status;
@@ -138,11 +139,11 @@ main(int argc, char *argv[])
 		mode = S_IRWXU | S_IRWXG | S_IRWXO;
 		
 		if (m != NULL) {
-			if ((set = setmode(m)) == NULL)
+			if ((set = modecomp(m)) == NULL)
 				fprintf(stderr, "mkdir: invalid file mode: %s",
 						m);
 
-			mode = getmode(set, mode);
+			mode = modeset(set, mode);
 		}
 
 		if (mkdir(argv[i], mode) == -1) {
