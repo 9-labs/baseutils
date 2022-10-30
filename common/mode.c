@@ -45,6 +45,16 @@
  */
 
 /*
+ * Contains 2 procedures:
+ * 	* void *modecomp(const char *str);
+ * 		Takes a symbolic mode string (from the likes of `chmod`) and
+ * 		'compiles' it into a structure to be interpreted and applied by
+ * 	* mode_t modeset(void *set, mode_t mode);
+ * 		Takes the compiled mode from `modecomp()` and applies it to
+ * 		the supplied `mode`.
+ */
+
+/*
  * Following is an excerpt from the POSIX definition of `chmod` containing a 
  * grammar for symbolic modes.
  *
@@ -108,6 +118,9 @@ enum state {
 	APPLY
 };
 
+/*
+ * Applies the given structure of actions to `mode` and returns said value.
+ */
 mode_t
 modeset(const void *set, mode_t mode)
 {
@@ -137,6 +150,12 @@ modeset(const void *set, mode_t mode)
 	return mode;
 }
 
+/*
+ * Compiles the given symbolic mode string into a structure to be interpreted
+ * and applied by `modeset()`. 
+ *
+ * Currently just a sort of state machine that loops through the given string.
+ */
 void *
 modecomp(const char *str)
 {
@@ -291,8 +310,9 @@ modecomp(const char *str)
 				/*
 				 * If we have an = operator we're going to 
 				 * change it to a - with the current wholist
-				 * and all permissions. Then create a new
-				 * action of op + with the following perms.
+				 * and all permissions. In order to clear the 
+				 * permissions. Then create a new action of op
+				 * + with the following perms.
 				 */
 				if (curr->op == '=') {
 					curr->op = '-';
