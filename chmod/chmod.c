@@ -36,6 +36,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <ftw.h>
+#include "mode.h"
 
 static const char *usage = "chmod [-R] mode file...";
 static int status;
@@ -86,9 +87,11 @@ main(int argc, char *argv[])
 	char *m;
 	void *set;
 	int i;
+	struct stat *s;
 	
 	status = EXIT_SUCCESS;
 	R = false;
+	s = malloc(sizeof(struct stat));
 
 	/*
 	 * We only support one flag (-R), there is no reason to use getopt
@@ -97,10 +100,12 @@ main(int argc, char *argv[])
 
 	if (strcmp(argv[1], "-R") == 0) {
 		R = true;
+		argc -= 1;
+		argv += 1;
 	}
 
-	argc -= 2;
-	argv += 2;
+	argc -= 1;
+	argv += 1;
 
 	if (argc < 2) {
 		fprintf(stderr, "chmod: requires a mode and file argument.\n");
@@ -110,18 +115,21 @@ main(int argc, char *argv[])
 
 	m = argv[0];
 
-	if ((set = setmode(m)) == NULL) {
+	if ((set = modecomp(m)) == NULL) {
 		fprintf(stderr, "chmod: invalid file mode: %s\n", m);
 		return EXIT_FAILURE;
 	}
-
-	mode = getmode(set, mode);
 
 	argc--;
 	argv++;
 
 	for (i = 0; i < argc; i++) {
-		if (R) {	// -R 
+		stat(argv[i], s);
+		mode = s->st_mode;
+
+		mode = modeset(set, mode);
+
+		if (R) { // -R 
 			recurse(argv[i]);
 			return status;
 		}
@@ -131,6 +139,8 @@ main(int argc, char *argv[])
 			status = EXIT_FAILURE;
 		}
 	}
+
+	free(s);
 
 	return status;
 }
