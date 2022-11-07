@@ -1,35 +1,15 @@
-BINARIES = bin/cat bin/pwd bin/head bin/mkdir bin/chmod bin/rmdir
-
-OBJECTS = bin/mode.o
+BINARIES=cat chmod head mkdir pwd rmdir
+OBJECTS=mode.o
 
 all: $(OBJECTS) $(BINARIES)
 
-bin/mode.o: common/mode.c
-	cc -c -o bin/mode.o common/mode.c
+chmod: mode.o chmod.c
+	cc -c chmod.c -o chmod.o
+	cc chmod.o mode.o -o chmod
 
-cat: bin/cat
-bin/cat: cat/cat.c
-	cd cat; $(MAKE)
-
-pwd: bin/pwd
-bin/pwd: pwd/pwd.c
-	cd pwd; $(MAKE)
-
-head: bin/head
-bin/head: head/head.c
-	cd head; $(MAKE)
-
-mkdir: bin/mkdir
-bin/mkdir: bin/mode.o mkdir/mkdir.c
-	cd mkdir; $(MAKE)
-
-chmod: bin/chmod
-bin/chmod: bin/mode.o chmod/chmod.c
-	cd chmod; $(MAKE)
-
-rmdir: bin/rmdir
-bin/rmdir: rmdir/rmdir.c
-	cd rmdir; $(MAKE)
+mkdir: mode.o mkdir.c
+	cc -c mkdir.c -o mkdir.o
+	cc mkdir.o mode.o -o mkdir
 
 clean:
-	rm -f $(BINARIES) $(OBJECTS)
+	rm -f $(OBJECTS) $(BINARIES)
