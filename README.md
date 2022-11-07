@@ -1,13 +1,13 @@
 # baseutils
-###### Implementations of basic Unix utilities, for learning purposes.
+###### Implementations of basic Unix utilities
 
 ## Utilities
 
 Utilities implemented so far:
 
-* [cat](cat)
-* [pwd](pwd)
-* [head](head)
-* [mkdir](mkdir)
-* [rmdir](rmdir)
-* [chmod](chmod)
+* [cat](cat.c)
+* [pwd](pwd.c)
+* [head](head.c)
+* [mkdir](mkdir.c)
+* [rmdir](rmdir.c)
+* [chmod](chmod.c)
