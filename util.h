@@ -2,7 +2,6 @@
 #define _UTIL_H_
 #include <sys/stat.h>
 
-mode_t  modeset(const void *set, mode_t mode);
-void *  modecomp(const char *str);
+int     modeset(const char *modestr, mode_t *modeset);
 
 #endif /* _UTIL_H_ */
