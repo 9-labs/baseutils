@@ -6,15 +6,15 @@
  * modification, are permitted provided that the following conditions are met:
  * 
  * 1. Redistributions of source code must retain the above copyright notice,
- * 	this list of conditions and the following disclaimer.
+ *      this list of conditions and the following disclaimer.
  *
  * 2. Redistributions in binary form must reproduce the above copyright notice,
- *	this list of conditions and the following disclaimer in the
- *	documentation and/or other materials provided with the distribution.
+ *      this list of conditions and the following disclaimer in the
+ *      documentation and/or other materials provided with the distribution.
  *
  * 3. Neither the name of the copyright holder nor the names of its
- *	contributors may be used to endorse or promote products derived from
- *	this software without specific prior written permission.
+ *      contributors may be used to endorse or promote products derived from
+ *      this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -41,69 +41,69 @@ static int status;
 static FILE *
 openfile(char *filename)
 {
-	FILE *f;
+        FILE *f;
 
-	f = fopen(filename, "r");
+        f = fopen(filename, "r");
         
-	if (f == NULL)
-		fprintf(stderr, "cat: %s: %s\n", filename, strerror(errno));
+        if (f == NULL)
+                fprintf(stderr, "cat: %s: %s\n", filename, strerror(errno));
 
-	return f;
+        return f;
 }
 
 static void
 output(FILE *f)
 {
-	char ch;
+        char ch;
 
-	while ((ch = fgetc(f)) != EOF) {
-		putchar(ch);
-	}
+        while ((ch = fgetc(f)) != EOF) {
+                putchar(ch);
+        }
 
-	if (f != stdin)
-		fclose(f);
+        if (f != stdin)
+                fclose(f);
 }
 
 int
 main(int argc, char *argv[])
 {
-	char ch;
-	int i;
-	FILE *f;
+        char ch;
+        int i;
+        FILE *f;
 
-	status = EXIT_SUCCESS;
+        status = EXIT_SUCCESS;
 
-	while ((ch = getopt(argc, argv, "u")) != -1) {
-		switch (ch) {
-		case 'u':
-			setvbuf(stdout, NULL, _IONBF, 0);
-			break;
-		case '?':
-		default:
-			fprintf(stderr, "Usage:\n\t%s\n", usage);
-			return 1;
-		}
-	}
+        while ((ch = getopt(argc, argv, "u")) != -1) {
+                switch (ch) {
+                case 'u':
+                        setvbuf(stdout, NULL, _IONBF, 0);
+                        break;
+                case '?':
+                default:
+                        fprintf(stderr, "Usage:\n\t%s\n", usage);
+                        return 1;
+                }
+        }
 
-	argv += optind;
-	argc -= optind;
+        argv += optind;
+        argc -= optind;
 
-	if (argc < 1) {
-		output(stdin);
-		return EXIT_SUCCESS;
-	}
+        if (argc < 1) {
+                output(stdin);
+                return EXIT_SUCCESS;
+        }
 
-	for (i = 0; i < argc; i++) {
-		if (strcmp(argv[i], "-") == 0)
-			f = stdin;
-		else
-			f = openfile(argv[i]);
+        for (i = 0; i < argc; i++) {
+                if (strcmp(argv[i], "-") == 0)
+                        f = stdin;
+                else
+                        f = openfile(argv[i]);
 
-		if (f != NULL)
-			output(f);
-		else
-			status = EXIT_FAILURE;
-	}
+                if (f != NULL)
+                        output(f);
+                else
+                        status = EXIT_FAILURE;
+        }
 
-	return status;
+        return status;
 }
