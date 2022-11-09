@@ -101,18 +101,19 @@ clause:
         for (; *ptr != '\0'; ptr++) {
                 switch (*ptr) {
                 case 'u':
-                        who |= S_IRWXU | S_ISUID;
+                        who |= S_IRWXU;
                         continue;
                 case 'g':
-                        who |= S_IRWXG | S_ISGID;
+                        who |= S_IRWXG;
                         continue;
                 case 'o':
                         who |= S_IRWXO;
                         continue;
                 case 'a':
-                        who |= S_IRWXU | S_IRWXG | S_IRWXO | S_ISUID | S_ISGID;
+                        who |= S_IRWXU | S_IRWXG | S_IRWXO;
                         continue;
                 default:
+                        who |= S_IRWXU | S_IRWXG | S_IRWXO;
                         break;
                 }
 
@@ -133,7 +134,7 @@ clause:
 
         ptr++;
 
-        /* find permissions, setup mask with who */
+        /* find permissions/permcopy and setup mask to be used */
         for (; *ptr != '\0'; ptr++) {
                 switch (*ptr) {
                 case 'r':
@@ -144,6 +145,15 @@ clause:
                         continue;
                 case 'x':
                         work = who & (S_IXUSR | S_IXGRP | S_IXOTH);
+                        continue;
+                /* TODO
+                case 'X':
+                        continue;
+                case 's':
+                        continue;
+                */
+                case 't':
+                        work |= S_ISVTX;
                         continue;
                 /* permcopy */
                 case 'u':
