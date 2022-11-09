@@ -88,14 +88,14 @@ modeset(const char *modestr, mode_t *modeset)
 {
         const char *ptr;
         char op, perm;
-        mode_t work, who, mode;
+        mode_t copy, work, who, mode;
 
         ptr = modestr;
         mode = *modeset;
 
 clause:
         op = perm = 0;
-        work = who = 0;
+        copy = work = who = 0;
 
         /* Find who's permissions we're editing */
         for (; *ptr != '\0'; ptr++) {
@@ -145,6 +145,25 @@ clause:
                 case 'x':
                         work = who & (S_IXUSR | S_IXGRP | S_IXOTH);
                         continue;
+                /* permcopy */
+                case 'u':
+                        copy = *modeset;
+                        copy |= copy >> 3;
+                        copy |= copy >> 3;
+                        work = who & copy;
+                        break;
+                case 'g':
+                        copy = *modeset;
+                        copy |= copy << 3;
+                        copy |= copy >> 3;
+                        work = who & copy;
+                        break;
+                case 'o':
+                        copy = *modeset;
+                        copy |= copy << 3;
+                        copy |= copy << 3;
+                        work = who & copy;
+                        break;
                 default:
                         break;
                 }
