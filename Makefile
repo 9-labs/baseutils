@@ -1,15 +1,15 @@
 BINARIES=cat chmod head mkdir pwd rmdir
-OBJECTS=mode.o
 
-all: $(OBJECTS) $(BINARIES)
+all: $(BINARIES)
 
-chmod: mode.o chmod.c
+chmod: util.o chmod.c
 	cc -c chmod.c -o chmod.o
-	cc chmod.o mode.o -o chmod
-
-mkdir: mode.o mkdir.c
+	cc chmod.o util.o -o chmod
+	rm -f chmod.o
+mkdir: util.o mkdir.c
 	cc -c mkdir.c -o mkdir.o
-	cc mkdir.o mode.o -o mkdir
+	cc mkdir.o util.o -o mkdir
+	rm -f mkdir.o
 
 clean:
-	rm -f $(OBJECTS) $(BINARIES)
+	rm -f $(BINARIES) util.o

@@ -35,7 +35,8 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/stat.h>
-#include "mode.h"
+
+#include "util.h"
 
 static const char *usage = "mkdir [-p] [-m mode] dir...";
 static int status;
