@@ -38,23 +38,6 @@
 #include <sys/stat.h>
 
 /*
- * This is a portable parser for symbolic file modes (ex. in `chmod`) to
- * be used throughout baseutils. Inspired by `getmode()` and `setmode()` as
- * seen in <unistd.h> throughout various BSD libc implementations.
- *      -- Alan
- */
-
-/*
- * Contains 2 procedures:
- *      * void *modecomp(const char *str);
- *              Takes a symbolic mode string (from the likes of `chmod`) and
- *              'compiles' it into a structure to be interpreted and applied by
- *      * mode_t modeset(void *set, mode_t mode);
- *              Takes the compiled mode from `modecomp()` and applies it to
- *              the supplied `mode`.
- */
-
-/*
  * Following is an excerpt from the POSIX definition of `chmod` containing a 
  * grammar for symbolic modes.
  *
@@ -96,286 +79,107 @@
  *                      ;
  */
 
-struct action {
-        char op;
-        char permcopy;
-        struct {
-                bool u : 1;
-                bool g : 1;
-                bool o : 1;
-        } permset;
-        mode_t perms;
-        struct action *next;
-};
-
-enum state {
-        CLAUSE,
-        WHOLIST,
-        ACTION,
-        OP,
-        PERMCOPY,
-        PERM,
-        APPLY
-};
-
 /*
- * Applies the given structure of actions to `mode` and returns said value.
+ * 
  */
-mode_t
-modeset(const void *set, mode_t mode)
+int
+modeset(const char *modestr, mode_t *modeset)
 {
-        struct action *action;
-        mode_t mid;
-        bool u, g, o;
+        const char *ptr;
+        char op, perm;
+        mode_t work, who, mode;
 
-        action = (struct action *) set;
+        ptr = *modestr;
+        mode = *modeset;
 
+clause:
+        op = perm = 0;
+        work = who = 0;
 
-        switch (action->op) {
+        /* Find who's permissions we're editing */
+        for (; *ptr != '\0'; ptr++) {
+                switch (*ptr) {
+                case 'u':
+                        who |= S_IRWXU | S_ISUID;
+                        continue;
+                case 'g':
+                        who |= S_IRWXG | S_ISGID;
+                        continue;
+                case 'o':
+                        who |= S_IRWXO;
+                        continue;
+                case 'a':
+                        who |= S_IRWXU | S_IRWXG | S_IRWXO | S_ISUID | S_ISGID;
+                        continue;
+                default:
+                        break;
+                }
+
+                break;
+        }
+
+        /* find operator */
+        switch (*ptr) {
         case '+':
-                mode |= action->perms;
+        case '-':
+        case '=':
+                op = *ptr;
+                break;
+        default:
+                errno = EINVAL;
+                return EXIT_FAILURE;
+        }
+
+        ptr++;
+
+        /* find permissions, setup mask with who */
+        for (; *ptr != '\0'; ptr++) {
+                switch (*ptr) {
+                case 'r':
+                        work = who & (S_IRUSR | S_IRGRP | S_IROTH);
+                        continue;
+                case 'w':
+                        work = who & (S_IWUSR | S_IWGRP | S_IWOTH);
+                        continue;
+                case 'x':
+                        work = who & (S_IXUSR | S_IXGRP | S_IXOTH);
+                        continue;
+                default:
+                        break;
+                }
+
+                if (work == 0) {
+                        /* invalid or missing permission character */
+                        errno = EINVAL;
+                        return EXIT_FAILURE;
+                }
+                break;
+        }
+
+        /* do our work on the given mode depending on our operator */
+        switch (op) {
+        case '+':
+                /* + operator: turn selected bits on */
+                mode |= work;
                 break;
         case '-':
-                action->perms = ~action->perms;
-                mode &= action->perms;
+                /* - operator: turn selected bits off */
+                work = ~work;
+                mode &= work;
                 break;
-        case '\0':
-        default:
+        case '=':
+                /* = operator: clear and then set everything mentioned */
+
                 break;
         }
 
-        if (action->next != NULL)
-                mode = modeset((void *) action->next, mode);
-
-        return mode;
-}
-
-/*
- * Compiles the given symbolic mode string into a structure to be interpreted
- * and applied by `modeset()`. 
- *
- * Currently just a sort of state machine that loops through the given string.
- */
-void *
-modecomp(const char *str)
-{
-        enum state state;
-        const char *ptr;
-        struct action *root;
-        struct action *curr;
-        bool u, g, o;
-        bool r, w, x, X, s, t;
-
-        state = CLAUSE;
-        ptr = str;
-
-        root = NULL;
-        curr = NULL;
-
-        r = w = x = X = s = t = false;
-
-        while (*ptr != '\0' || state == APPLY) {
-
-                if (*ptr == ',') {
-                        ptr++;
-                        state = CLAUSE;
-                        continue;
-                }
-
-                switch (*ptr) {
-                case 'u': case 'g': case 'o': case 'a':
-                case '+': case '-': case '=':
-                case 'r': case 'w': case 'x': case 'X': case 's': case 't':
-                        break;
-                default:
-                        if (state != APPLY) {
-                                errno = EINVAL;
-                                return NULL;
-                        }
-                }
-
-                switch (state) {
-                        case CLAUSE:
-                                u = g = o = false;
-                                state = WHOLIST;
-                                continue;
-                        case WHOLIST:
-                                switch (*ptr) {
-                                        case 'u':
-                                                u = true;
-                                                ptr++;
-                                                state = WHOLIST;
-                                                continue;
-                                        case 'g':
-                                                g = true;
-                                                ptr++;
-                                                state = WHOLIST;
-                                                continue;
-                                        case 'o':
-                                                o = true;
-                                                ptr++;
-                                                state = WHOLIST;
-                                                continue;
-                                        case 'a':
-                                                u = g = o = true;
-                                                ptr++;
-                                                state = WHOLIST;
-                                                continue;
-                                        default:
-                                                state = ACTION;
-                                                continue;
-                                }
-                        case ACTION:
-                                if (root == NULL) {
-                                        root = calloc(1,
-                                                sizeof(struct action));
-                                        curr = root;
-                                } else {
-                                        curr->next = calloc(1,
-                                                sizeof(struct action));
-                                        curr = curr->next;
-                                }
-                                curr->op = '\0';
-                                state = OP;
-                        case OP:
-                                switch (*ptr) {
-                                case '+':
-                                        curr->op = '+';
-                                        ptr++;
-                                        state = PERMCOPY;
-                                        continue;
-                                case '-':
-                                        curr->op = '-';
-                                        ptr++;
-                                        state = PERMCOPY;
-                                        continue;
-                                case '=':
-                                        curr->op = '=';
-                                        ptr++;
-                                        state = PERMCOPY;
-                                        continue;
-                                default:
-                                        // an operator is required
-                                        errno = EINVAL;
-                                        return NULL;
-                                }
-                        case PERMCOPY:
-                                switch (*ptr) {
-                                case 'u':
-                                        curr->permcopy = 'u';
-                                        ptr++;
-                                        state = APPLY;
-                                        continue;
-                                case 'g':
-                                        curr->permcopy = 'g';
-                                        ptr++;
-                                        state = APPLY;
-                                        continue;
-                                case 'o':
-                                        curr->permcopy = 'o';
-                                        ptr++;
-                                        state = APPLY;
-                                        continue;
-                                default:
-                                        state = PERM;
-                                        continue;
-                                }
-                        case PERM:
-                                switch (*ptr) {
-                                case 'r':
-                                        r = true;
-                                        ptr++;
-                                        state = PERM;
-                                        break;
-                                case 'w':
-                                        w = true;
-                                        ptr++;
-                                        state = PERM;
-                                        break;
-                                case 'x':
-                                        x = true;
-                                        ptr++;
-                                        state = PERM;
-                                        break;
-                                default:
-                                        if (*ptr == ',') {
-                                                ptr++;
-                                                state = CLAUSE;
-                                                continue;
-                                        }
-                                        state = CLAUSE;
-                                        break;
-                                }
-                        case APPLY:
-                                /*
-                                 * If we have an = operator we're going to 
-                                 * change it to a - with the current wholist
-                                 * and all permissions. In order to clear the 
-                                 * permissions. Then create a new action of op
-                                 * + with the following perms.
-                                 */
-                                if (curr->op == '=') {
-                                        curr->op = '-';
-                                        if (u)
-                                                curr->perms |= S_IRWXU;
-                                        if (g)
-                                                curr->perms |= S_IRWXG;
-                                        if (o)
-                                                curr->perms |= S_IRWXO;
-
-                                        curr->next = calloc(1,
-                                                        sizeof(struct action));
-
-                                        if (curr->permcopy != '\0') {
-                                                curr->next->permcopy =
-                                                        curr->permcopy;
-                                                curr->permset.u = u;
-                                                curr->permset.g = g;
-                                                curr->permset.o = o;
-                                        }
-
-                                        curr = curr->next;
-                                        curr->op = '+';
-                                }
-
-                                if (r) {
-                                        if (u)
-                                                curr->perms |= S_IRUSR;
-                                        if (g)
-                                                curr->perms |= S_IRGRP;
-                                        if (o)
-                                                curr->perms |= S_IROTH;
-                                        r = false;
-                                }
-
-                                if (w) {
-                                        if (u)
-                                                curr->perms |= S_IWUSR;
-                                        if (g)
-                                                curr->perms |= S_IWGRP;
-                                        if (o)
-                                                curr->perms |= S_IWOTH;
-
-                                        w = false;
-                                }
-
-                                if (x) {
-                                        if (u)
-                                                curr->perms |= S_IXUSR;
-                                        if (g)
-                                                curr->perms |= S_IXGRP;
-                                        if (o)
-                                                curr->perms |= S_IXOTH;
-
-                                        x = false;
-                                }
-
-                                state = PERM;
-
-                                continue;
-                }
+        if (*ptr == ',') {
+                ptr++;
+                goto clause;
         }
 
-        return root;
+        *modeset = mode;
+
+        return EXIT_SUCCESS;
 }
 
