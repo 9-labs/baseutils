@@ -36,7 +36,8 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <ftw.h>
-#include "mode.h"
+
+#include "util.h"
 
 static const char *usage = "chmod [-R] mode file...";
 static int status;
