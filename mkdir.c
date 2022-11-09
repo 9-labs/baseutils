@@ -28,6 +28,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -140,11 +141,9 @@ main(int argc, char *argv[])
                 mode = S_IRWXU | S_IRWXG | S_IRWXO;
                 
                 if (m != NULL) {
-                        if ((set = modecomp(m)) == NULL)
+                        if (modeset(m, &mode) != 0)
                                 fprintf(stderr, "mkdir: invalid file mode: %s",
                                                 m);
-
-                        mode = modeset(set, mode);
                 }
 
                 if (mkdir(argv[i], mode) == -1) {

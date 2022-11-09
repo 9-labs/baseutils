@@ -80,7 +80,8 @@
  */
 
 /*
- * 
+ * Accepts symbolic mode string `modestr` and applies its changes to `modeset`
+ * Returns > 0 for syntax error and sets errno=EINVAL
  */
 int
 modeset(const char *modestr, mode_t *modeset)
@@ -89,7 +90,7 @@ modeset(const char *modestr, mode_t *modeset)
         char op, perm;
         mode_t work, who, mode;
 
-        ptr = *modestr;
+        ptr = modestr;
         mode = *modeset;
 
 clause:
@@ -168,8 +169,11 @@ clause:
                 mode &= work;
                 break;
         case '=':
-                /* = operator: clear and then set everything mentioned */
+                /* = operator: clear user permissions mentioned, then set */
+                who = ~who;
+                mode &= who;
 
+                mode |= work;
                 break;
         }
 
