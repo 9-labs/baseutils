@@ -28,6 +28,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -47,7 +48,7 @@ static mode_t mode;
 static void recurse(const char *path);
 
 static int
-ftwcallback(const char *name, const struct stat *object, int flag)
+ftwcb(const char *name, const struct stat *object, int flag)
 {
         if (chmod(name, mode) != 0) {
                 fprintf(stderr, "chmod: %s\n", strerror(errno));
@@ -67,7 +68,7 @@ recurse(const char *path)
 {
         int r;
         
-        r = ftw(path, ftwcallback, 1);
+        r = ftw(path, ftwcb, 1);
 
         if (r != 0) {
                 fprintf(stderr, "chmod: %s\n", strerror(errno));
@@ -86,7 +87,6 @@ main(int argc, char *argv[])
 {
         bool R;
         char *m;
-        void *set;
         int i;
         struct stat *s;
         
@@ -116,11 +116,6 @@ main(int argc, char *argv[])
 
         m = argv[0];
 
-        if ((set = modecomp(m)) == NULL) {
-                fprintf(stderr, "chmod: invalid file mode: %s\n", m);
-                return EXIT_FAILURE;
-        }
-
         argc--;
         argv++;
 
@@ -128,7 +123,10 @@ main(int argc, char *argv[])
                 stat(argv[i], s);
                 mode = s->st_mode;
 
-                mode = modeset(set, mode);
+                if ((modeset(m, &mode)) != 0) {
+                        fprintf(stderr, "chmod: invalid file mode: %s\n", m);
+                        return EXIT_FAILURE;
+                }
 
                 if (R) { // -R 
                         recurse(argv[i]);
