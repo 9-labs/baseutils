@@ -81,17 +81,25 @@
 
 /*
  * Accepts symbolic mode string `modestr` and applies its changes to `modeset`
- * Returns > 0 for syntax error and sets errno=EINVAL
+ * Returns > 0 for any syntax errors
  */
 int
 modeset(const char *modestr, mode_t *modeset)
 {
         const char *ptr;
+        char *end;
         char op, perm;
         mode_t copy, work, who, mode;
 
         ptr = modestr;
         mode = *modeset;
+
+        /* if octal number we set the mode absolutely and return */
+        mode = (mode_t) strtol(ptr, &end, 8);
+        if (*end == '\0') {
+               *modeset = mode;
+               return EXIT_SUCCESS;
+        }
 
 clause:
         op = perm = 0;
@@ -128,7 +136,6 @@ clause:
                 op = *ptr;
                 break;
         default:
-                errno = EINVAL;
                 return EXIT_FAILURE;
         }
 
@@ -180,7 +187,6 @@ clause:
 
                 if (work == 0) {
                         /* invalid or missing permission character */
-                        errno = EINVAL;
                         return EXIT_FAILURE;
                 }
                 break;
