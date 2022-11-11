@@ -12,4 +12,5 @@ Utilities implemented so far:
 * [rmdir](rmdir.c)
 * [chmod](chmod.c)
 * [basename](basename.c)
+* [dirname](dirname.c)
 
