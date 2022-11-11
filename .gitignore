@@ -7,3 +7,5 @@ rmdir
 cat
 head
 pwd
+basename
+dirname
