@@ -1,4 +1,4 @@
-BINARIES=basename cat chmod dirname head mkdir pwd rmdir
+BINARIES=basename cat chmod dirname echo head mkdir pwd rmdir
 
 all: $(BINARIES)
 

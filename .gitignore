@@ -9,3 +9,4 @@ head
 pwd
 basename
 dirname
+echo
