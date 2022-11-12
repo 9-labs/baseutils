@@ -13,4 +13,4 @@ Utilities implemented so far:
 * [chmod](chmod.c)
 * [basename](basename.c)
 * [dirname](dirname.c)
-
+* [echo](echo.c)

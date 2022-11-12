@@ -1,4 +1,6 @@
 /*
+ * chmod.c
+ *
  * Copyright (c) 2022, Alan Potteiger
  * All rights reserved.
  * 
@@ -143,3 +145,4 @@ main(int argc, char *argv[])
 
         return status;
 }
+

@@ -1,4 +1,6 @@
 /*
+ * mkdir.c
+ *
  * Copyright (c) 2022, Alan Potteiger
  * All rights reserved.
  * 
@@ -42,7 +44,7 @@
 static const char *usage = "mkdir [-p] [-m mode] dir...";
 static int status;
 
-// -p: If leading directories in path are missing, create them.
+/* -p: If leading directories in path are missing, create them. */
 static void
 pswitch(char *path)
 {
@@ -54,11 +56,11 @@ pswitch(char *path)
         copy = strdup(path);
         ptr = copy;
 
-        // if we're based in the root directory, we're leaving the initial '/'
+        /* if based in the root directory, we're leaving the initial '/' */
         if (ptr[0] == '/')
                 ptr++;
 
-        // Looping through and attempting to create each required directory
+        /* Looping through and attempting to create each required directory */
         while (*ptr != '\0') {
                 if (*ptr != '/') {
                         ptr++;
@@ -74,7 +76,7 @@ pswitch(char *path)
                 if (strcmp(path, copy) == 0)
                         break;
 
-                // POSIX demands it done like this for some reason...
+                /* POSIX demands it done like this for some reason... */
                 e = mkdir(copy, 0);
                 if (e != -1)
                         chmod(copy, (S_IWUSR|S_IXUSR|(~umask(umask(0))))&0777);
@@ -134,7 +136,7 @@ main(int argc, char *argv[])
         }       
 
         for (i = 0; i < argc; i++) {
-                // -p: if leading directories in path are missing create them
+                /*-p: if leading directories in path are missing create them */
                 if (p)
                         pswitch(argv[i]);
 
@@ -155,3 +157,4 @@ main(int argc, char *argv[])
 
         return status;
 }
+

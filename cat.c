@@ -1,4 +1,6 @@
 /*
+ * cat.c
+ *
  * Copyright (c) 2022, Alan Potteiger
  * All rights reserved.
  * 
@@ -28,15 +30,14 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
 #include <stdio.h>
-#include <stdbool.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
 #include <unistd.h>
 
 static const char *usage = "cat [-u] [file...]";
-static int status;
 
 static FILE *
 openfile(char *filename)
@@ -70,6 +71,7 @@ main(int argc, char *argv[])
         char ch;
         int i;
         FILE *f;
+        int status;
 
         status = EXIT_SUCCESS;
 
@@ -81,7 +83,7 @@ main(int argc, char *argv[])
                 case '?':
                 default:
                         fprintf(stderr, "Usage:\n\t%s\n", usage);
-                        return 1;
+                        return EXIT_FAILURE;
                 }
         }
 
