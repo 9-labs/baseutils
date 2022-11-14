@@ -1,12 +1,4 @@
 *.core
 *.out
 *.o
-chmod
-mkdir
-rmdir
-cat
-head
-pwd
-basename
-dirname
-echo
+bin
