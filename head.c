@@ -2,6 +2,8 @@
    Copyright (c) 2022, Alan Potteiger
    See `LICENSE` for copyright and license details */
 
+#define _POSIX_C_SOURCE 200809L
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
