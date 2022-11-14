@@ -65,23 +65,30 @@ main(int argc, char *argv[])
         R = false;
         s = malloc(sizeof(struct stat));
 
+        /* don't care about argv[0] */
+        argc--;
+        argv++;
+
         /* We only support one flag (-R), there is no reason to use getopt
            for argument parsing here, just interferes with mode parsing. */
 
-        if (strcmp(argv[1], "-R") == 0) {
-                R = true;
-                argc -= 1;
-                argv += 1;
+        if (argc < 2) {
+                fprintf(stderr, "Usage:\n\t%s\n", usage);
+                return EXIT_FAILURE;
         }
 
-        argc -= 1;
-        argv += 1;
+        if (strcmp(argv[0], "-R") == 0) {
+                R = true;
+                argc--;
+                argv++;
+        }
 
         if (argc < 2) {
                 fprintf(stderr, "chmod: requires a mode and file argument.\n");
                 fprintf(stderr, "Usage:\n\t%s\n", usage);
                 return EXIT_FAILURE;
         }
+
 
         m = argv[0];
 
