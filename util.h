@@ -1,3 +1,7 @@
+/* baseutils: `util.h` - utility definitions.
+   Copyright (c) 2022, Alan Potteiger
+   See `LICENSE` for copyright and license details */
+
 #ifndef _UTIL_H_
 #define _UTIL_H_
 #include <sys/stat.h>
