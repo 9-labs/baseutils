@@ -1,5 +1,5 @@
 BINARIES=bin/basename bin/cat bin/chmod bin/dirname bin/echo bin/head \
-	 bin/mkdir bin/pwd bin/rmdir
+	 bin/ls bin/mkdir bin/pwd bin/rmdir
 CFLAGS=-std=c99
 all: bin $(BINARIES)
 bin:
@@ -28,6 +28,9 @@ bin/echo: echo.c
 
 bin/head: head.c
 	$(CC) $(CFLAGS) head.c -o bin/head
+
+bin/ls: ls.c
+	$(CC) $(CFLAGS) ls.c -o bin/ls
 
 bin/mkdir: bin/util.o bin/mkdir.o
 	$(CC) $(CFLAGS) bin/mkdir.o bin/util.o -o bin/mkdir
