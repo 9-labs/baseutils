@@ -3,6 +3,8 @@
    See `LICENSE` for copyright and license details */
 
 #define _POSIX_C_SOURCE 200809L
+#define _XOPEN_SOURCE 700       /* Single UNIX Specification, Version 4
+                                   required for -t, S_ISVTX bits */
 
 #include <stdio.h>
 #include <stdlib.h>
